@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 public class Server {
@@ -31,10 +32,16 @@ public class Server {
                         try {
                             remote = mainServer.accept();
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            //e.printStackTrace();
                         }
                         activeClients.add(remote);
-                        System.out.println("Remote Client accepted: "+remote.getInetAddress());
+                        try {
+                            System.out.println("Remote Client accepted: "+remote.getInetAddress());
+
+                        }
+                        catch (NullPointerException e) {
+
+                        }
                         Socket finalRemote = remote;
                         Thread clientThread = new Thread() {
                             public void run() {
@@ -55,7 +62,12 @@ public class Server {
             }
             clientAcceptThread.stop();
             Thread.sleep(1000);
-            mainServer.close();
+            try {
+                mainServer.close();
+
+            } catch (SocketException e) {
+
+            }
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -66,13 +78,23 @@ public class Server {
         String clientName = "";
         BufferedReader in = null;
         try {
-            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-            printWritersOfActiveClients.add(out);
+            PrintWriter out;
+            try {
+                out = new PrintWriter(clientSocket.getOutputStream(), true);
+                printWritersOfActiveClients.add(out);
+            } catch (NullPointerException e) {
+
+            }
+
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         try {
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            try {
+                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            }catch (NullPointerException e) {
+
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -106,7 +128,12 @@ public class Server {
         }
 
         try {
-            clientSocket.close();
+            try {
+                clientSocket.close();
+            }
+            catch (NullPointerException e) {
+
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
