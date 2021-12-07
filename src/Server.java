@@ -18,62 +18,65 @@ public class Server {
     static Thread clientAcceptThread;
 
     public static void main(String[] args) {
-        ServerSocket mainServer;
-        try {
-
-            mainServer = new ServerSocket(666);
-            System.out.println("Server gestartet...");
-            System.out.println("Admin: "+args[0]);
-            adminName = args[0];
-            clientAcceptThread = new Thread() {
-                public void run() {
-                    while (!shutdown) {
-                        Socket remote = null;
-                        try {
-                            remote = mainServer.accept();
-                        } catch (IOException e) {
-                            //e.printStackTrace();
-                        }
-                        activeClients.add(remote);
-                        try {
-                            System.out.println("Remote Client accepted: "+remote.getInetAddress());
-
-                        }
-                        catch (NullPointerException e) {
-
-                        }
-                        Socket finalRemote = remote;
-                        Thread clientThread = new Thread() {
-                            public void run() {
-                                handleClient(finalRemote);
-                            }
-                        };
-                        clientThread.start();
-                    }
-                }
-            };
-            clientAcceptThread.start();
-            while (!shutdown) {
-                Thread.sleep(1000);
-            }
-            for (int i = 0; i < clientHandlerThreads.size(); i++) {
-                clientHandlerThreads.get(i).stop();
-
-            }
-            clientAcceptThread.stop();
-            Thread.sleep(1000);
+        if (!(args[0]==null)) {
+            ServerSocket mainServer;
             try {
-                mainServer.close();
 
-            } catch (SocketException e) {
+                mainServer = new ServerSocket(666);
+                System.out.println("Server gestartet...");
 
+                System.out.println("Admin: "+args[0]);
+                adminName = args[0];
+                clientAcceptThread = new Thread() {
+                    public void run() {
+                        while (!shutdown) {
+                            Socket remote = null;
+                            try {
+                                remote = mainServer.accept();
+                            } catch (IOException e) {
+                                //e.printStackTrace();
+                            }
+                            activeClients.add(remote);
+                            try {
+                                System.out.println("Remote Client accepted: "+remote.getInetAddress());
+
+                            }
+                            catch (NullPointerException e) {
+
+                            }
+                            Socket finalRemote = remote;
+                            Thread clientThread = new Thread() {
+                                public void run() {
+                                    handleClient(finalRemote);
+                                }
+                            };
+                            clientThread.start();
+                        }
+                    }
+                };
+                clientAcceptThread.start();
+                while (!shutdown) {
+                    Thread.sleep(1000);
+                }
+                for (int i = 0; i < clientHandlerThreads.size(); i++) {
+                    clientHandlerThreads.get(i).stop();
+
+                }
+                clientAcceptThread.stop();
+                try {
+                    mainServer.close();
+
+                } catch (SocketException e) {
+
+                }
+
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
             }
 
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+        }
         }
 
-    }
     static public void handleClient(Socket clientSocket) {
         String clientName = "";
         BufferedReader in = null;

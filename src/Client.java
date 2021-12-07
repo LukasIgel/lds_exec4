@@ -20,11 +20,12 @@ public class Client {
         }
         try {
             clientSocket = new Socket(InetAddress.getLocalHost(), 666);
+            /*
             while (!clientSocket.isConnected()) {
                 Thread.sleep(100);
-            }
+            }*/
             System.out.println("Connected!");
-            Thread.sleep(1000);
+            //Thread.sleep(1000);
             Thread clientSenderThread = new Thread(){
                 public void run() {
                     clientSender(clientSocket);
@@ -48,9 +49,9 @@ public class Client {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
+        } /*catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     public static void clientSender(Socket clientSocket) {
