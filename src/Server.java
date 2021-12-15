@@ -6,7 +6,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
-
+/**
+ * Server-Klasse. Wird in IDE mit Parameter "Adriane" gestartet. Damit kann Client2 in der IDE PWRDWNSYS senden.
+ */
 public class Server {
     static boolean shutdown = false;
     static String adminName;
@@ -117,6 +119,9 @@ public class Server {
                         if (clientName.equals(adminName)) {
                             if (incomingMessage.equals("PWRDWNSYS")) {
                                 shutdown=true;
+                                for (int i = 0; i < printWritersOfActiveClients.size(); i++) {
+                                    printWritersOfActiveClients.get(i).println(incomingMessage);
+                                }
                                 System.out.println("fahre Server herunter...");
                             }
 

@@ -7,53 +7,54 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
+/**
+ * Client-Klasse. Wird in IDE mit Parameter "Anita", einem NICHT-Admin-Namen, gestartet.
+ */
 public class Client {
     static boolean shutdown = false;
     static String userName = null;
     static Socket clientSocket = null;
+    static Scanner scanner;
     public static void main (String[] args) {
 
-
-        if (args[0].startsWith("userName=")) {
-            userName = args[0].substring(9);
-            //System.out.println(userName);
-        }
-        try {
-            clientSocket = new Socket(InetAddress.getLocalHost(), 666);
-            /*
-            while (!clientSocket.isConnected()) {
-                Thread.sleep(100);
-            }*/
-            System.out.println("Connected!");
-            //Thread.sleep(1000);
-            Thread clientSenderThread = new Thread(){
-                public void run() {
-                    clientSender(clientSocket);
+        if (args[0]!=null) {
+            if (args[0].startsWith("userName=")) {
+                userName = args[0].substring(9);
+                if (!userName.equals("")) {
+                    try {
+                        clientSocket = new Socket(InetAddress.getLocalHost(), 666);
+                        System.out.println("Connected!");
+                        Thread clientSenderThread = new Thread(){
+                            public void run() {
+                                clientSender(clientSocket);
+                            }
+                        };
+                        clientSenderThread.start();
+                        Thread clientReceiverThread = new Thread(){
+                            public void run() {
+                                clientReceiver(clientSocket);
+                            }
+                        };
+                        clientReceiverThread.start();
+                        while (!shutdown) {
+                            Thread.sleep(1000);
+                        }
+                        clientSenderThread.stop();
+                        clientReceiverThread.stop();
+                        clientSocket.close();
+                        scanner.ioException();
+                        System.out.println("Drücke Enter zum Beenden.");
+                    } catch (UnknownHostException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-            };
-            clientSenderThread.start();
-            Thread clientReceiverThread = new Thread(){
-                public void run() {
-                    clientReceiver(clientSocket);
-                }
-            };
-            clientReceiverThread.start();
-            /*
-            while (!shutdown) {
-
             }
-            */
-
-            //clientSocket.close();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } /*catch (InterruptedException e) {
-            e.printStackTrace();
-        }*/
+        }
     }
-
     public static void clientSender(Socket clientSocket) {
         PrintWriter out = null;
         try {
@@ -62,25 +63,33 @@ public class Client {
             e.printStackTrace();
         }
         out.println(userName);
-        Scanner scanner = new Scanner(System.in);
+        scanner = new Scanner(System.in);
         String userInput;
         while(!shutdown){
             userInput = scanner.nextLine();
             out.println(userInput);
-            shutdown = userInput.equals("PWRDWNSYS") ? true :false;
+            if (userInput.equals("PWRDWNSYS")) {
+                shutdown=true;
+            }
+
         }
     }
     public static void clientReceiver(Socket clientSocket) {
         try {
+            String receivedMessage;
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             while(!shutdown){
                 if (in.ready()) {
-                    System.out.println(in.readLine());
+                    receivedMessage = in.readLine();
+                    System.out.println(receivedMessage);
+                    if (receivedMessage.equals("PWRDWNSYS")) {
+                        shutdown=true;
+                    }
                 }
             }
+            System.out.println("Server fährt herunter!");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 }
