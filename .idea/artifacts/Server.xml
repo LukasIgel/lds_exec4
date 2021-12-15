@@ -2,7 +2,7 @@
   <artifact type="jar" name="Server">
     <output-path>$PROJECT_DIR$/out/artifacts/Server</output-path>
     <root id="archive" name="lds_exec4.jar">
-      <element id="module-output" name="lds_exec4" />
+      <element id="module-output" name="lds_exec3_aufgabe2_1" />
     </root>
   </artifact>
 </component>
